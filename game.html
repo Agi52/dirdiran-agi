@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dir Diran</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: url('lapangan.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(255,255,255,0.9);
+      padding: 10px 24px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      z-index: 10;
+    }
+    .ui span {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .reset-btn {
+      background-color: #783F32;
+      color: white;
+      border: none;
+      padding: 6px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .game-wrapper {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 480px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 12px;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.2);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 12px;
+    }
+    .game-status {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(255,255,255,0.95);
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      z-index: 10;
+      min-width: 300px;
+    }
+    .power-meter {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 200px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.5);
+      display: none;
+      z-index: 10;
+    }
+    .power-fill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(to top, #4CAF50, #FFEB3B, #FF5722);
+      border-radius: 8px;
+      transition: height 0.1s ease;
+    }
+    .game-over-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .game-over-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      max-width: 400px;
+      animation: slideIn 0.5s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .game-over-title {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .final-score {
+      font-size: 24px;
+      margin: 20px 0;
+      background: rgba(255,255,255,0.2);
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .play-again-btn {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .play-again-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    .stars {
+      font-size: 30px;
+      margin: 10px 0;
+    }
+
+    .back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(93, 46, 38, 0.8);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    z-index: 15;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-button:hover {
+    background-color: rgba(93, 46, 38, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+
+    /* Music Control Styling */
+    .music-control {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(93, 46, 38, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 15;
+      backdrop-filter: blur(5px);
+    }
+
+    .music-control:hover {
+      background-color: rgba(93, 46, 38, 1);
+      transform: scale(1.1);
+    }
+
+    .volume-indicator {
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 15px;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .volume-indicator.show {
+      opacity: 1;
+    }
+
+    /* Responsive adjustments for music control */
+    @media (max-width: 768px) {
+      .music-control {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+        top: 15px;
+        right: 15px;
+      }
+      
+      .back-button {
+        padding: 8px 15px;
+        font-size: 12px;
+        top: 15px;
+        left: 15px;
+      }
+
+      .volume-indicator {
+        top: 60px;
+        right: 15px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Music dari Pixabay -->
+  <audio id="backgroundMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2024/08/15/audio_a3b9c7c072.mp3" type="audio/mpeg">
+    <source src="https://www.bensound.com/bensound-music/bensound-creativeminds.mp3" type="audio/mpeg">
+    <source src="https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-one/zapsplat_backgrounds_gentle_ambient_music_loop_001_11124.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="ui">
+    <span>Skor: <span id="score">0</span></span>
+    <span>Kelereng Sisa: <span id="remaining">10</span></span>
+    <button class="reset-btn" onclick="resetGame()">Ulangi</button>
+  </div>
+
+  <!-- Back Button -->
+  <button class="back-button" onclick="goBackToHome()" title="Kembali ke Halaman Utama">
+    🏠 Home
+  </button>
+
+  <!-- Music Control -->
+  <button class="music-control" onclick="toggleMusic()" id="musicBtn" title="Kontrol Musik">
+    🎵
+  </button>
+
+  <!-- Volume Indicator -->
+  <div class="volume-indicator" id="volumeIndicator">
+    Musik: Bahagia Kids Game 🎶
+  </div>
+
+  <div class="game-wrapper">
+    <canvas id="gameCanvas" width="800" height="480"></canvas>
+  </div>
+  <div class="power-meter" id="powerMeter">
+    <div class="power-fill" id="powerFill"></div>
+  </div>
+  <div class="game-status" id="gameStatus">Klik dan tarik kelereng orange untuk memulai!</div>
+
+  <div class="game-over-screen" id="gameOverScreen">
+    <div class="game-over-content">
+      <div class="game-over-title" id="gameOverTitle">GAME OVER</div>
+      <div class="stars" id="gameOverStars">⭐⭐⭐</div>
+      <div class="final-score">
+        <div>Skor Akhir:</div>
+        <div style="font-size: 36px; font-weight: bold;" id="finalScore">0</div>
+      </div>
+      <div id="gameOverMessage" style="margin: 15px 0; font-size: 16px;"></div>
+      <button class="play-again-btn" onclick="resetGame()">Main Lagi</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const ringRadius = 90;
+
+    let playerMarble, targetMarbles, score, remaining, dragging, dragStart, gameOver;
+    let particles = [];
+    let trails = [];
+    let slowMotion = 1;
+    let waitingForMarblesToStop = false;
+
+    // Music Control Variables
+    let isPlaying = false;
+    let musicStarted = false;
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const musicBtn = document.getElementById('musicBtn');
+    const volumeIndicator = document.getElementById('volumeIndicator');
+
+    // Set volume untuk game (20% untuk musik yang ceria)
+    backgroundMusic.volume = 0.2;
+
+    // Music Control Functions
+    function toggleMusic() {
+      if (!musicStarted) {
+        // First time playing - show music info
+        volumeIndicator.classList.add('show');
+        setTimeout(() => {
+          volumeIndicator.classList.remove('show');
+        }, 3000);
+        musicStarted = true;
+      }
+
+      if (isPlaying) {
+        backgroundMusic.pause();
+        musicBtn.innerHTML = '🎵';
+        musicBtn.title = 'Klik untuk memutar musik';
+        isPlaying = false;
+      } else {
+        // Try to play music
+        backgroundMusic.play().then(() => {
+          musicBtn.innerHTML = '🔇';
+          musicBtn.title = 'Klik untuk menghentikan musik';
+          isPlaying = true;
+        }).catch(error => {
+          console.log('Tidak dapat memutar musik:', error);
+          playFallbackMusic();
+        });
+      }
+    }
+
+    function playFallbackMusic() {
+      const fallbackSources = [
+        'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3',
+        'https://freesound.org/data/previews/316/316847_3263906-lq.mp3',
+        'https://opengameart.org/sites/default/files/bensound-cute.mp3'
+      ];
+      
+      let currentSource = 0;
+      
+      function tryNextSource() {
+        if (currentSource >= fallbackSources.length) {
+          console.log('Semua sumber musik gagal dimuat');
+          musicBtn.innerHTML = '❌';
+          musicBtn.title = 'Musik tidak tersedia';
+          return;
+        }
+        
+        const fallbackAudio = document.createElement('audio');
+        fallbackAudio.src = fallbackSources[currentSource];
+        fallbackAudio.loop = true;
+        fallbackAudio.volume = 0.2;
+        
+        fallbackAudio.addEventListener('error', () => {
+          currentSource++;
+          tryNextSource();
+        });
+        
+        fallbackAudio.play().then(() => {
+          backgroundMusic.src = fallbackAudio.src;
+          musicBtn.innerHTML = '🔇';
+          musicBtn.title = 'Klik untuk menghentikan musik';
+          isPlaying = true;
+        }).catch(() => {
+          currentSource++;
+          tryNextSource();
+        });
+      }
+      
+      tryNextSource();
+    }
+
+    // Handle audio loading errors
+    backgroundMusic.addEventListener('error', function() {
+      console.log('Error loading primary audio source, trying fallback...');
+      playFallbackMusic();
+    });
+
+    // Auto-start music when game starts (after first user interaction)
+    let hasUserInteracted = false;
+    function handleFirstInteraction() {
+      if (!hasUserInteracted && !musicStarted) {
+        hasUserInteracted = true;
+        toggleMusic();
+      }
+    }
+
+    // Audio Context untuk efek suara
+    let audioContext;
+    let isAudioInitialized = false;
+
+    function initAudio() {
+      if (!isAudioInitialized) {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          isAudioInitialized = true;
+        } catch (e) {
+          console.log('Audio not supported');
+        }
+      }
+    }
+
+    function playCollisionSound(intensity = 0.5) {
+      if (!audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Suara collision kelereng - frekuensi tinggi dengan decay cepat
+      oscillator.frequency.setValueAtTime(800 + Math.random() * 400, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(intensity * 0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+      
+      oscillator.type = 'sine';
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.15);
+    }
+
+    function playWallBounceSound(intensity = 0.5) {
+      if (!audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Suara pantulan dinding - frekuensi lebih rendah dengan karakter berbeda
+      oscillator.frequency.setValueAtTime(300 + Math.random() * 200, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.08);
+      
+      gainNode.gain.setValueAtTime(intensity * 0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+      
+      oscillator.type = 'triangle';
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.12);
+    }
+
+    function playShootSound() {
+      if (!audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Suara tembakan - swoosh effect
+      oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator.type = 'sawtooth';
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+
+    // Partikel untuk efek visual
+    class Particle {
+      constructor(x, y, color, size = 3) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
+        this.color = color;
+        this.size = size;
+        this.life = 1;
+        this.decay = 0.02;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.95;
+        this.vy *= 0.95;
+        this.life -= this.decay;
+        this.size *= 0.98;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.life;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // Trail effect untuk kelereng
+    class Trail {
+      constructor(x, y, color, size) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.size = size;
+        this.life = 1;
+        this.decay = 0.05;
+      }
+
+      update() {
+        this.life -= this.decay;
+        this.size *= 0.95;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.life * 0.6;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function addParticles(x, y, color, count = 8) {
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function addTrail(x, y, color, size) {
+      trails.push(new Trail(x, y, color, size));
+    }
+
+    function initMarbles() {
+      targetMarbles = [];
+      // Membuat 15 kelereng target dengan warna berbeda seperti pool
+      const colors = ['#FF1744', '#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#795548'];
+      for (let i = 0; i < 15; i++) {
+        const angle = (i / 15) * 2 * Math.PI + Math.random() * 0.3;
+        const distance = Math.random() * (ringRadius - 25) + 15;
+        const x = centerX + distance * Math.cos(angle);
+        const y = centerY + distance * Math.sin(angle);
+        targetMarbles.push({ 
+          x, 
+          y, 
+          r: 8, 
+          vx: 0, 
+          vy: 0,
+          color: colors[i % colors.length],
+          glowing: false,
+          number: i + 1
+        });
+      }
+    }
+
+    function drawMarble(x, y, r, color, number = null, glowing = false) {
+      // Efek glow jika sedang glowing
+      if (glowing) {
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(x, y, r + 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Gradient untuk efek 3D
+      const gradient = ctx.createRadialGradient(x - r/3, y - r/3, r/6, x, y, r);
+      if (color === "orange") {
+        gradient.addColorStop(0, "#FFEB3B");
+        gradient.addColorStop(0.3, "#FF9800");
+        gradient.addColorStop(0.7, "#FF5722");
+        gradient.addColorStop(1, "#BF360C");
+      } else {
+        gradient.addColorStop(0, "#FFFFFF");
+        gradient.addColorStop(0.3, color);
+        gradient.addColorStop(0.7, color);
+        gradient.addColorStop(1, "#000000");
+      }
+      
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // Border dengan efek metallic
+      ctx.strokeStyle = "#333333";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Highlight untuk efek glossy
+      ctx.beginPath();
+      ctx.arc(x - r/3, y - r/3, r/3, 0, Math.PI * 2);
+      const highlightGradient = ctx.createRadialGradient(x - r/3, y - r/3, 0, x - r/3, y - r/3, r/3);
+      highlightGradient.addColorStop(0, "rgba(255,255,255,0.8)");
+      highlightGradient.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = highlightGradient;
+      ctx.fill();
+
+      // Nomor pada kelereng target
+      if (number && color !== "orange") {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 10px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(number, x, y);
+      }
+    }
+
+    function drawField() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Gambar lingkaran dengan efek pool table
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
+      
+      // Gradient untuk efek kedalaman
+      const fieldGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, ringRadius);
+      fieldGradient.addColorStop(0, "rgba(76, 175, 80, 0.15)");
+      fieldGradient.addColorStop(0.7, "rgba(56, 142, 60, 0.25)");
+      fieldGradient.addColorStop(1, "rgba(27, 94, 32, 0.35)");
+      ctx.fillStyle = fieldGradient;
+      ctx.fill();
+      
+      // Border dengan efek wooden rail
+      ctx.strokeStyle = "#8B4513";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      
+      // Inner border
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius - 3, 0, Math.PI * 2);
+      ctx.strokeStyle = "#D2691E";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function drawMarbles() {
+      targetMarbles.forEach(m => {
+        drawMarble(m.x, m.y, m.r, m.color, m.number, m.glowing);
+      });
+    }
+
+    function drawPlayer() {
+      // Trail effect untuk kelereng pemain
+      if (playerMarble.active && (Math.abs(playerMarble.vx) > 1 || Math.abs(playerMarble.vy) > 1)) {
+        addTrail(playerMarble.x, playerMarble.y, "rgba(255, 152, 0, 0.6)", playerMarble.r * 0.8);
+      }
+
+      drawMarble(playerMarble.x, playerMarble.y, playerMarble.r, "orange");
+      
+      // Garis bidik dengan efek visual yang lebih menarik
+      if (dragging && dragStart) {
+        const dx = dragStart.x - playerMarble.x;
+        const dy = dragStart.y - playerMarble.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const power = Math.min(distance, 120) / 120;
+        
+        // Update power meter
+        const powerMeter = document.getElementById('powerMeter');
+        const powerFill = document.getElementById('powerFill');
+        powerMeter.style.display = 'block';
+        powerFill.style.height = `${power * 100}%`;
+        
+        // Garis bidik dengan gradient
+        const gradient = ctx.createLinearGradient(playerMarble.x, playerMarble.y, dragStart.x, dragStart.y);
+        gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
+        gradient.addColorStop(0.5, "rgba(255, 193, 7, 0.7)");
+        gradient.addColorStop(1, "rgba(244, 67, 54, 0.5)");
+        
+        ctx.beginPath();
+        ctx.moveTo(playerMarble.x, playerMarble.y);
+        ctx.lineTo(dragStart.x, dragStart.y);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Trajectory dots
+        for (let i = 1; i < 8; i++) {
+          const t = i / 8;
+          const dotX = playerMarble.x + (dragStart.x - playerMarble.x) * t;
+          const dotY = playerMarble.y + (dragStart.y - playerMarble.y) * t;
+          
+          ctx.beginPath();
+          ctx.arc(dotX, dotY, 3, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${1 - t * 0.7})`;
+          ctx.fill();
+        }
+      } else {
+        document.getElementById('powerMeter').style.display = 'none';
+      }
+    }
+
+    function drawEffects() {
+      // Update dan gambar partikel
+      particles = particles.filter(p => {
+        p.update();
+        p.draw();
+        return p.life > 0;
+      });
+
+      // Update dan gambar trails
+      trails = trails.filter(t => {
+        t.update();
+        t.draw();
+        return t.life > 0;
+      });
+    }
+
+    function isInsideCircle(x, y) {
+      const dx = x - centerX;
+      const dy = y - centerY;
+      return Math.sqrt(dx * dx + dy * dy) <= ringRadius;
+    }
+
+    function checkCollision(m1, m2) {
+      const dx = m1.x - m2.x;
+      const dy = m1.y - m2.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      return dist < m1.r + m2.r;
+    }
+
+    function resolveCollision(m1, m2) {
+      const dx = m1.x - m2.x;
+      const dy = m1.y - m2.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance === 0) return;
+      
+      // Hitung intensitas collision berdasarkan kecepatan
+      const speed1 = Math.sqrt(m1.vx * m1.vx + m1.vy * m1.vy);
+      const speed2 = Math.sqrt(m2.vx * m2.vx + m2.vy * m2.vy);
+      const collisionIntensity = Math.min((speed1 + speed2) / 10, 1);
+      
+      // Play collision sound
+      playCollisionSound(collisionIntensity);
+      
+      // Efek visual collision
+      addParticles((m1.x + m2.x) / 2, (m1.y + m2.y) / 2, m2.color, 6);
+      
+      // Efek glow pada kedua kelereng yang tertabrak
+      m1.glowing = true;
+      m2.glowing = true;
+      setTimeout(() => { 
+        m1.glowing = false; 
+        m2.glowing = false; 
+      }, 200);
+      
+      // Normalisasi vektor collision
+      const nx = dx / distance;
+      const ny = dy / distance;
+      
+      // Pisahkan kelereng yang overlap
+      const overlap = m1.r + m2.r - distance;
+      const separateX = nx * overlap * 0.5;
+      const separateY = ny * overlap * 0.5;
+      
+      m1.x += separateX;
+      m1.y += separateY;
+      m2.x -= separateX;
+      m2.y -= separateY;
+      
+      // Fisika collision realistis (elastic collision dengan massa sama)
+      // Proyeksi velocity ke normal dan tangent
+      const v1n = m1.vx * nx + m1.vy * ny; // velocity m1 sepanjang normal
+      const v1t = -m1.vx * ny + m1.vy * nx; // velocity m1 sepanjang tangent
+      const v2n = m2.vx * nx + m2.vy * ny; // velocity m2 sepanjang normal
+      const v2t = -m2.vx * ny + m2.vy * nx; // velocity m2 sepanjang tangent
+      
+      // Untuk elastic collision dengan massa sama, velocity normal bertukar
+      const v1n_new = v2n;
+      const v2n_new = v1n;
+      
+      // Velocity tangent tetap sama (tidak ada friction pada collision)
+      const v1t_new = v1t;
+      const v2t_new = v2t;
+      
+      // Konversi kembali ke koordinat x,y dengan restitution factor
+      const restitution = 0.85; // Pool balls biasanya 0.8-0.9
+      
+      m1.vx = (v1n_new * nx - v1t_new * ny) * restitution;
+      m1.vy = (v1n_new * ny + v1t_new * nx) * restitution;
+      m2.vx = (v2n_new * nx - v2t_new * ny) * restitution;
+      m2.vy = (v2n_new * ny + v2t_new * nx) * restitution;
+    }
+
+    // Fungsi untuk mendeteksi dan menyelesaikan collision antar kelereng target
+    function handleTargetCollisions() {
+      for (let i = 0; i < targetMarbles.length; i++) {
+        for (let j = i + 1; j < targetMarbles.length; j++) {
+          if (checkCollision(targetMarbles[i], targetMarbles[j])) {
+            resolveCollision(targetMarbles[i], targetMarbles[j]);
+          }
+        }
+      }
+    }
+    
+    function updateGameStatus(message) {
+      document.getElementById("gameStatus").textContent = message;
+    }
+
+    function checkAllMarblesStopped() {
+      const playerStopped = !playerMarble.active || (Math.abs(playerMarble.vx) < 0.1 && Math.abs(playerMarble.vy) < 0.1);
+      const allTargetsStopped = targetMarbles.every(m => Math.abs(m.vx) < 0.1 && Math.abs(m.vy) < 0.1);
+      return playerStopped && allTargetsStopped;
+    }
+
+    function processStoppedMarbles() {
+      let marblesRemoved = 0;
+      let pointsEarned = 0;
+      
+      // Cek kelereng pemain - kalah jika berhenti di dalam lingkaran
+      if (playerMarble.active === false && isInsideCircle(playerMarble.x, playerMarble.y)) {
+        showGameOver(false);
+        return;
+      }
+      
+      // Hapus kelereng target yang berada di luar lingkaran
+      targetMarbles = targetMarbles.filter(m => {
+        if (!isInsideCircle(m.x, m.y)) {
+          marblesRemoved++;
+          pointsEarned += 10;
+          addParticles(m.x, m.y, m.color, 12);
+          return false; // Hapus kelereng
+        }
+        return true; // Simpan kelereng
+      });
+      
+      // Update skor
+      if (pointsEarned > 0) {
+        // Bonus untuk multiple marbles
+        if (marblesRemoved > 1) {
+          pointsEarned += marblesRemoved * 5;
+        }
+        
+        score += pointsEarned;
+        document.getElementById("score").textContent = score;
+        
+        if (marblesRemoved === 1) {
+          updateGameStatus(`1 kelereng keluar! +${pointsEarned} poin!`);
+        } else if (marblesRemoved > 1) {
+          updateGameStatus(`${marblesRemoved} kelereng keluar! +${pointsEarned} poin (bonus!)!`);
+        }
+      }
+      
+      // Cek kondisi menang
+      if (targetMarbles.length === 0) {
+        showGameOver(true);
+        return;
+      }
+      
+      // Lanjut ke tembakan berikutnya
+      remaining--;
+      document.getElementById("remaining").textContent = remaining;
+      
+      if (remaining > 0) {
+        // Kelereng pemain tetap di posisi terakhir untuk tembakan berikutnya
+        // Tidak mengubah posisi playerMarble, hanya reset velocity
+        playerMarble.vx = 0;
+        playerMarble.vy = 0;
+        playerMarble.active = false;
+        updateGameStatus(`Siap untuk tembakan berikutnya dari posisi ini! Sisa: ${remaining}`);
+      } else {
+        showGameOver(false);
+      }
+    }
+
+    function showGameOver(isWin) {
+      gameOver = true;
+      const gameOverScreen = document.getElementById('gameOverScreen');
+      const gameOverTitle = document.getElementById('gameOverTitle');
+      const gameOverStars = document.getElementById('gameOverStars');
+      const finalScore = document.getElementById('finalScore');
+      const gameOverMessage = document.getElementById('gameOverMessage');
+      
+      finalScore.textContent = score;
+      
+      if (isWin) {
+        gameOverTitle.textContent = "SELAMAT!";
+        gameOverTitle.style.color = "#4CAF50";
+        gameOverStars.textContent = "🏆⭐⭐⭐⭐⭐🏆";
+        gameOverMessage.textContent = "Anda berhasil mengeluarkan semua kelereng dari lingkaran!";
+        
+        // Efek kemenangan
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            addParticles(Math.random() * canvas.width, Math.random() * canvas.height, 
+                        ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1'][Math.floor(Math.random() * 4)], 5);
+          }, i * 50);
+        }
+      } else {
+        gameOverTitle.textContent = "GAME OVER";
+        gameOverTitle.style.color = "#FF5722";
+        
+        if (remaining <= 0) {
+          gameOverStars.textContent = "😔";
+          gameOverMessage.textContent = "Kelereng habis! Coba lagi untuk skor yang lebih baik.";
+        } else {
+          gameOverStars.textContent = "😔";
+          gameOverMessage.textContent = "Kelereng orange berhenti di dalam lingkaran!";
+        }
+      }
+      
+      gameOverScreen.style.display = 'flex';
+    }
+
+    function update() {
+      if (gameOver) {
+        // Tetap update efek visual meski game over
+        drawField();
+        drawEffects();
+        drawMarbles();
+        drawPlayer();
+        requestAnimationFrame(update);
+        return;
+      }
+
+      // Update dengan slow motion effect
+      const deltaTime = 1 / slowMotion;
+      
+      // Update kelereng target
+      targetMarbles.forEach(m => {
+        m.x += m.vx * deltaTime;
+        m.y += m.vy * deltaTime;
+        m.vx *= 0.98; // Friction
+        m.vy *= 0.98;
+        
+        // Trail effect untuk kelereng yang bergerak cepat
+        if (Math.abs(m.vx) > 2 || Math.abs(m.vy) > 2) {
+          addTrail(m.x, m.y, m.color, m.r * 0.6);
+        }
+        
+        // Collision dengan tepi canvas
+        if (m.x - m.r < 0 || m.x + m.r > canvas.width) {
+          m.vx *= -0.8;
+          m.x = Math.max(m.r, Math.min(canvas.width - m.r, m.x));
+          addParticles(m.x, m.y, m.color, 4);
+        }
+        if (m.y - m.r < 0 || m.y + m.r > canvas.height) {
+          m.vy *= -0.8;
+          m.y = Math.max(m.r, Math.min(canvas.height - m.r, m.y));
+          addParticles(m.x, m.y, m.color, 4);
+        }
+      });
+
+      // Handle collision antar kelereng target
+      handleTargetCollisions();
+
+      // Update kelereng pemain
+      if (playerMarble.active) {
+        playerMarble.x += playerMarble.vx * deltaTime;
+        playerMarble.y += playerMarble.vy * deltaTime;
+        playerMarble.vx *= 0.98;
+        playerMarble.vy *= 0.98;
+
+        // Collision dengan tepi canvas
+        if (playerMarble.x - playerMarble.r < 0 || playerMarble.x + playerMarble.r > canvas.width) {
+          playerMarble.vx *= -0.7;
+          playerMarble.x = Math.max(playerMarble.r, Math.min(canvas.width - playerMarble.r, playerMarble.x));
+          addParticles(playerMarble.x, playerMarble.y, "orange", 5);
+        }
+        if (playerMarble.y - playerMarble.r < 0 || playerMarble.y + playerMarble.r > canvas.height) {
+          playerMarble.vy *= -0.7;
+          playerMarble.y = Math.max(playerMarble.r, Math.min(canvas.height - playerMarble.r, playerMarble.y));
+          addParticles(playerMarble.x, playerMarble.y, "orange", 5);
+        }
+
+        // Collision detection dengan kelereng target
+        targetMarbles.forEach(m => {
+          if (checkCollision(playerMarble, m)) {
+            resolveCollision(playerMarble, m);
+          }
+        });
+
+        // Cek kelereng pemain berhenti
+        if (Math.abs(playerMarble.vx) < 0.5 && Math.abs(playerMarble.vy) < 0.5) {
+          playerMarble.active = false;
+          playerMarble.vx = 0;
+          playerMarble.vy = 0;
+          slowMotion = 1; // Reset slow motion
+          waitingForMarblesToStop = true;
+          updateGameStatus("Menunggu semua kelereng berhenti...");
+        }
+      }
+
+      // Cek apakah semua kelereng sudah berhenti
+      if (waitingForMarblesToStop && checkAllMarblesStopped()) {
+        waitingForMarblesToStop = false;
+        processStoppedMarbles();
+      }
+
+      // Render
+      drawField();
+      drawEffects();
+      drawMarbles();
+      drawPlayer();
+      requestAnimationFrame(update);
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (playerMarble.active || remaining <= 0 || gameOver || waitingForMarblesToStop) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const dx = mouseX - playerMarble.x;
+      const dy = mouseY - playerMarble.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance <= playerMarble.r + 15) {
+        dragging = true;
+        dragStart = { x: mouseX, y: mouseY };
+      }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (dragging) {
+        const rect = canvas.getBoundingClientRect();
+        dragStart = { 
+          x: e.clientX - rect.left, 
+          y: e.clientY - rect.top 
+        };
+      }
+    });
+
+    canvas.addEventListener("mouseup", (e) => {
+      if (!dragging) return;
+      
+      dragging = false;
+      const dx = dragStart.x - playerMarble.x;
+      const dy = dragStart.y - playerMarble.y;
+      const power = Math.min(Math.sqrt(dx * dx + dy * dy), 120);
+      
+      if (power > 10) { // Minimal power untuk menembak
+        const force = power / 180;
+        playerMarble.vx = force * dx;
+        playerMarble.vy = force * dy;
+        playerMarble.active = true;
+        
+        // Slow motion effect untuk tembakan kuat
+        if (power > 80) {
+          slowMotion = 2;
+        }
+        
+        // Efek visual saat menembak
+        addParticles(playerMarble.x, playerMarble.y, "orange", 8);
+        updateGameStatus("Kelereng ditembakkan!");
+      }
+    });
+    
+    function resetGame() {
+      score = 0;
+      remaining = 10;
+      gameOver = false;
+      particles = [];
+      trails = [];
+      slowMotion = 1;
+      waitingForMarblesToStop = false;
+      
+      // Reset posisi kelereng pemain
+      playerMarble = { x: centerX, y: canvas.height - 40, r: 12, vx: 0, vy: 0, active: false };
+      dragging = false;
+      
+      document.getElementById("score").textContent = score;
+      document.getElementById("remaining").textContent = remaining;
+      document.getElementById('powerMeter').style.display = 'none';
+      document.getElementById('gameOverScreen').style.display = 'none';
+      updateGameStatus("Klik dan tarik kelereng orange untuk memulai!");
+      
+      initMarbles();
+    }
+
+    // Back to Home Function
+function goBackToHome() {
+  // Hentikan musik jika sedang dimainkan
+  if (isPlaying) {
+    backgroundMusic.pause();
+    isPlaying = false;
+  }
+  
+    // Konfirmasi sebelum keluar dari game
+    const confirmExit = confirm('Apakah Anda yakin ingin kembali ke halaman utama? Progress game akan hilang.');
+    
+    if (confirmExit) {
+      // Jika ada parent window atau opener, kembali ke sana
+      if (window.opener) {
+        window.close();
+      } else if (window.parent !== window) {
+        window.parent.location.href = 'index.html'; // Sesuaikan dengan struktur folder Anda
+      } else {
+        // Fallback: redirect ke halaman utama
+        window.location.href = 'index.html'; // Sesuaikan dengan struktur folder Anda
+      }
+    }
+}
+
+    // Inisialisasi game
+    resetGame();
+    update();
+  </script>
+</body>
+</html>

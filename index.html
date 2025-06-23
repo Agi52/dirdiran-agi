@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dir Diran</title>
+  <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body Styling */
+    body {
+      height: 100vh;
+      background: url('desa.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Logo Styling */
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: auto;
+      z-index: 10;
+    }
+
+    /* Main Container */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-top: 120px; /* Space for logo */
+    }
+
+    /* Start Button */
+    .start-btn {
+      font-size: 20px;
+      font-weight: 600;
+      padding: 12px 32px;
+      background-color: #5D2E26;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .start-btn:hover {
+      background-color: #3e1e19;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .start-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Music Control Button */
+    .music-control {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background-color: rgba(93, 46, 38, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .music-control:hover {
+      background-color: rgba(93, 46, 38, 1);
+      transform: scale(1.1);
+    }
+
+    /* Music Info */
+    .music-info {
+      position: absolute;
+      bottom: 80px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      max-width: 200px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+
+    .music-info.show {
+      opacity: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .logo {
+        width: 250px;
+        top: 15px;
+      }
+
+      .main-container {
+        margin-top: 100px;
+      }
+
+      .start-btn {
+        font-size: 18px;
+        padding: 10px 26px;
+      }
+
+      .music-control {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+        bottom: 15px;
+        right: 15px;
+      }
+
+      .music-info {
+        bottom: 70px;
+        right: 15px;
+        font-size: 11px;
+        max-width: 150px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        width: 200px;
+        top: 10px;
+      }
+
+      .main-container {
+        margin-top: 80px;
+      }
+
+      .start-btn {
+        font-size: 16px;
+        padding: 8px 20px;
+      }
+
+      .music-control {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Background Music -->
+  <audio id="backgroundMusic" loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-creativeminds.mp3" type="audio/mpeg">
+    <source src="https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-one/zapsplat_backgrounds_gentle_ambient_music_loop_001_11124.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Logo -->
+  <img src="dirdiran-removebg-preview.png" alt="Logo Dir Diran" class="logo">
+  
+  <!-- Main Content -->
+  <div class="main-container">
+    <button class="start-btn" onclick="navigateToGame()">
+      Klik To Start
+    </button>
+  </div>
+
+  <!-- Music Control -->
+  <button class="music-control" onclick="toggleMusic()" id="musicBtn" title="Klik untuk memutar/menghentikan musik">
+    🎵
+  </button>
+
+  <!-- Music Info -->
+  <div class="music-info" id="musicInfo">
+    Musik: Ambient Relaxing Music
+  </div>
+
+  <script>
+    let isPlaying = false;
+    let musicStarted = false;
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const musicBtn = document.getElementById('musicBtn');
+    const musicInfo = document.getElementById('musicInfo');
+
+    // Set volume
+    backgroundMusic.volume = 0.3;
+
+    function toggleMusic() {
+      if (!musicStarted) {
+        // First time playing - show info
+        musicInfo.classList.add('show');
+        setTimeout(() => {
+          musicInfo.classList.remove('show');
+        }, 3000);
+        musicStarted = true;
+      }
+
+      if (isPlaying) {
+        backgroundMusic.pause();
+        musicBtn.innerHTML = '🎵';
+        musicBtn.title = 'Klik untuk memutar musik';
+        isPlaying = false;
+      } else {
+        // Try to play music
+        backgroundMusic.play().then(() => {
+          musicBtn.innerHTML = '🔇';
+          musicBtn.title = 'Klik untuk menghentikan musik';
+          isPlaying = true;
+        }).catch(error => {
+          console.log('Tidak dapat memutar musik:', error);
+          // Fallback: try alternative music source
+          playFallbackMusic();
+        });
+      }
+    }
+
+    function playFallbackMusic() {
+      // Create alternative audio element with different sources
+      const fallbackSources = [
+        'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3',
+        'https://freesound.org/data/previews/316/316847_3263906-lq.mp3',
+        'https://opengameart.org/sites/default/files/bensound-cute.mp3',
+        'https://pixabay.com/music/?utm_source=link-attribution'
+      ];
+      
+      let currentSource = 0;
+      
+      function tryNextSource() {
+        if (currentSource >= fallbackSources.length) {
+          console.log('Semua sumber musik gagal dimuat');
+          musicBtn.innerHTML = '❌';
+          musicBtn.title = 'Musik tidak tersedia';
+          return;
+        }
+        
+        const fallbackAudio = document.createElement('audio');
+        fallbackAudio.src = fallbackSources[currentSource];
+        fallbackAudio.loop = true;
+        fallbackAudio.volume = 0.3;
+        
+        fallbackAudio.addEventListener('error', () => {
+          currentSource++;
+          tryNextSource();
+        });
+        
+        fallbackAudio.play().then(() => {
+          // Replace the original audio element
+          backgroundMusic.src = fallbackAudio.src;
+          musicBtn.innerHTML = '🔇';
+          musicBtn.title = 'Klik untuk menghentikan musik';
+          isPlaying = true;
+        }).catch(() => {
+          currentSource++;
+          tryNextSource();
+        });
+      }
+      
+      tryNextSource();
+    }
+
+    function navigateToGame() {
+      // Stop music before navigating
+      if (isPlaying) {
+        backgroundMusic.pause();
+      }
+      window.location.href = 'game.html';
+    }
+
+    // Auto-play music on first user interaction (required by browsers)
+    document.addEventListener('click', function() {
+      if (!musicStarted) {
+        toggleMusic();
+      }
+    }, { once: true });
+
+    // Optional: Preload background image
+    window.addEventListener('load', function() {
+      const img = new Image();
+      img.src = 'desa.png';
+      
+      // Show music info briefly when page loads
+      setTimeout(() => {
+        musicInfo.classList.add('show');
+        setTimeout(() => {
+          musicInfo.classList.remove('show');
+        }, 2000);
+      }, 1000);
+    });
+
+    // Handle audio loading errors
+    backgroundMusic.addEventListener('error', function() {
+      console.log('Error loading primary audio source, trying fallback...');
+      playFallbackMusic();
+    });
+  </script>
+</body>
+</html>
